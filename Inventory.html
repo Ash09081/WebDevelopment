@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+
+<div class="layout">
+
+<aside class="sidebar">
+    <h2>Reyes POS</h2>
+    <nav>
+        <a href="Dashboard.html">Dashboard</a>
+            <a href="Pos.html">POS</a>
+            <a href="Inventory.html">Inventory</a>
+            <a href="Statistics.html">Statistics</a>
+            <a href="Settings.html">Settings</a>
+            <a href="#" onclick="logout()">Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+
+<header class="header">
+    <h1>Inventory</h1>
+</header>
+
+<div class="inventory">
+
+<!-- FORM BOX -->
+<div class="form-box">
+    <h3 id="formTitle">Add Product</h3>
+
+    <input id="productName" placeholder="Product Name">
+
+    
+<input id="category" list="categoryList" placeholder="Enter category">
+
+<datalist id="categoryList">
+    <option value="Biscuit">
+    <option value="Beverages">
+    <option value="Snacks">
+    <option value="Fruits">
+    <option value="Frozen Foods">
+    <option value="Canned Goods">
+</datalist>
+
+
+    <input id="price" type="number" placeholder="Price">
+    <input id="stock" type="number" placeholder="Stock">
+
+    <button type="button" onclick="saveProduct()" class="save-btn">Save</button>
+</div>
+
+
+<div class="filters">
+
+    <input type="text" id="search" placeholder="Search product..." oninput="loadProducts()">
+
+    <select id="filterCategory" onchange="loadProducts()">
+        <option value="All">All Categories</option>
+        <option value="Biscuit">Biscuit</option>
+        <option value="Beverages">Beverages</option>
+        <option value="Snacks">Snacks</option>
+    </select>
+
+    <select id="sortBy" onchange="loadProducts()">
+        <option value="none">Sort By</option>
+        <option value="price">Price</option>
+        <option value="stock">Stock</option>
+    </select>
+
+</div>
+
+<!-- TABLE -->
+<h3>Product List</h3>
+
+<table class="inventory-table">
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Actions</th>
+    </tr>
+</thead>
+
+<tbody id="list"></tbody>
+</table>
+
+</div>
+
+</main>
+</div>
+
+<script>
+let editIndex = -1;
+
+function saveProduct() {
+    
+ let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    let data = {
+        name: document.getElementById("productName").value,
+        category: document.getElementById("category").value,
+        price: document.getElementById("price").value,
+        stock: document.getElementById("stock").value
+    };
+
+    if (editIndex === -1) {
+        products.push(data);
+    } else {
+        products[editIndex] = data;
+        editIndex = -1;
+        document.getElementById("formTitle").textContent = "Add Product";
+    }
+
+    localStorage.setItem("products", JSON.stringify(products));
+
+    clearForm();
+    loadProducts();
+    updateCategoryList(); // ✅ call here correctly
+
+}
+
+function loadProducts() {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    let search = document.getElementById("search").value.toLowerCase();
+    let category = document.getElementById("filterCategory").value;
+    let sort = document.getElementById("sortBy").value;
+
+    // ✅ FILTER: search text
+    if (search) {
+        products = products.filter(p =>
+            p.name.toLowerCase().includes(search)
+        );
+    }
+
+    // ✅ FILTER: category
+    if (category !== "All") {
+        products = products.filter(p => p.category === category);
+    }
+
+    // ✅ SORT
+    if (sort === "price") {
+        products.sort((a, b) => a.price - b.price);
+    }
+    if (sort === "stock") {
+        products.sort((a, b) => a.stock - b.stock);
+    }
+
+    list.innerHTML = "";
+
+    products.forEach((p, i) => {
+        let row = `
+        <tr>
+            <td>${p.name}</td>
+            <td>${p.category}</td>
+            <td>₱${p.price}</td>
+            <td class="${p.stock < 5 ? 'low-stock' : ''}">${p.stock}</td>
+            <td>
+                <button class="edit-btn" onclick="edit(${i})">Edit</button>
+                <button class="delete-btn" onclick="remove(${i})">Delete</button>
+            </td>
+        </tr>
+        `;
+        list.innerHTML += row;
+    });
+}
+
+
+function edit(i) {
+    let p = JSON.parse(localStorage.getItem("products"))[i];
+
+    document.getElementById("productName").value = p.name;
+    document.getElementById("category").value = p.category;
+    document.getElementById("price").value = p.price;
+    document.getElementById("stock").value = p.stock;
+
+    editIndex = i;
+    document.getElementById("formTitle").textContent = "Edit Product";
+}
+
+function remove(i) {
+    if (!confirm("Delete product?")) return;
+
+    let products = JSON.parse(localStorage.getItem("products"));
+    products.splice(i,1);
+
+    localStorage.setItem("products", JSON.stringify(products));
+    loadProducts();
+}
+
+
+function clearForm() {
+    document.getElementById("productName").value = "";
+    document.getElementById("category").value = "";  // ✅ ADD THIS
+    document.getElementById("price").value = "";
+    document.getElementById("stock").value = "";
+}
+
+
+loadProducts();
+
+function applyDarkMode(){
+    const dark = localStorage.getItem("darkMode");
+
+    if(dark === "true"){
+        document.body.classList.add("dark-mode");
+    }
+}
+
+applyDarkMode();
+
+function updateCategoryList() {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    let categories = [...new Set(products.map(p => p.category))];
+
+    let list = document.getElementById("categoryList");
+
+    // ✅ keep original categories
+    let defaultCategories = [
+        "Biscuit",
+        "Beverages",
+        "Snacks",
+        "Fruits",
+        "Frozen Foods",
+        "Canned Goods"
+    ];
+
+    let allCategories = [...new Set([...defaultCategories, ...categories])];
+
+    list.innerHTML = "";
+
+    allCategories.forEach(cat => {
+        let option = document.createElement("option");
+        option.value = cat;
+        list.appendChild(option);
+    });
+}
+
+
+
+function logout(){
+    if (confirm("Logout?")) {
+        window.location.href = "index.html";
+    }
+}
+
+</script>
+
+<footer class="main-footer">
+    <p>© 2026 Reyes POS System. All rights reserved.</p>
+    <small>Designed and Developed by Ashley Reyes</small>
+</footer>
+
+
+</body>
+</html>

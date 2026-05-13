@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reyes POS - Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="register-page">
+
+  <div class="register-container">
+    <h1>Register</h1>
+
+    <form onsubmit="registerUser(event)">
+      <label>Name</label>
+      <input type="text" id="name" required>
+
+      <label>Email</label>
+      <input type="email" id="email" required>
+
+      <label>Password</label>
+      
+<div class="password-field">
+    <input type="password" id="password">
+    <span onclick="togglePass('password')">👁</span>
+</div>
+
+
+      <label>Confirm Password</label>
+      <div class="password-field">
+    <input type="password" id="confirmPassword">
+    <span onclick="togglePass('confirmPassword')">👁</span>
+</div>
+
+      <button class="btn">Register</button>
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <a href="Login.html">Login</a>
+    </p>
+  </div>
+
+<script>
+function registerUser(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirmPassword").value; // ✅ FIXED
+
+    if (password !== confirm) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    const user = { name, email, password };
+    localStorage.setItem("user", JSON.stringify(user));
+
+    alert("Registered successfully!");
+    window.location.href = "Login.html";
+}
+
+function togglePass(id){
+    let input = document.getElementById(id);
+
+    if(input.type === "password"){
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
+
+</script>
+
+</body>
+</html>

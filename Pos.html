@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+
+<div class="layout">
+
+<aside class="sidebar">
+    <h2>Reyes POS</h2>
+    <nav>
+       <a href="Dashboard.html">Dashboard</a>
+            <a href="Pos.html">POS</a>
+            <a href="Inventory.html">Inventory</a>
+            <a href="Statistics.html">Statistics</a>
+            <a href="Settings.html">Settings</a>
+            <a href="#" onclick="logout()">Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+
+<header class="header">
+    <h1>Point of Sale</h1>
+</header>
+
+<div class="pos-container">
+
+<!-- PRODUCTS -->
+<div class="products">
+
+<h3>Categories</h3>
+<div class="categories">
+<button onclick="loadCategory('All')">All</button>
+<button onclick="loadCategory('Biscuit')">Biscuit</button>
+<button onclick="loadCategory('Beverages')">Beverages</button>
+<button onclick="loadCategory('Snacks')">Snacks</button>
+<button onclick="loadCategory('Fruits')">Fruits</button>
+<button onclick="loadCategory('Frozen Foods')">Frozen Foods</button>
+<button onclick="loadCategory('Can goods')">Can goods</button>
+
+</div>
+
+<div id="productList" class="product-list"></div>
+
+</div>
+
+<!-- CART -->
+<div class="cart">
+
+<h3>Cart</h3>
+<ul id="cartList"></ul>
+
+<h2>Total: ₱<span id="total">0</span></h2>
+
+<button class="pay-btn" onclick="checkout()">PAY</button>
+<button class="clear-btn" onclick="clearCart()">Clear</button>
+
+</div>
+
+</div>
+
+</main>
+</div>
+
+<script>
+
+let cart = [];
+
+function loadCategory(cat) {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    productList.innerHTML = "";
+
+    let filtered = cat === "All" ? products : products.filter(p => p.category === cat);
+
+    filtered.forEach((p, i) => {
+        let btn = document.createElement("button");
+       
+btn.innerHTML = `
+    <strong>${p.name}</strong>
+    <small>₱${p.price}</small>
+    <small>Stock: ${p.stock}</small>
+`;
+
+
+        btn.onclick = () => addItem(i);
+
+        productList.appendChild(btn);
+    });
+}
+
+function addItem(index) {
+    let products = JSON.parse(localStorage.getItem("products"));
+
+    if (products[index].stock <= 0) {
+        alert("Out of stock!");
+        return;
+    }
+
+    let found = cart.find(i => i.index === index);
+
+    if (found) {
+        found.qty++;
+    } else {
+        cart.push({ index, qty: 1 });
+    }
+
+    renderCart();
+}
+
+function renderCart() {
+    let products = JSON.parse(localStorage.getItem("products"));
+    cartList.innerHTML = "";
+
+    let total = 0;
+
+    cart.forEach((item, i) => {
+        let p = products[item.index];
+        let subtotal = p.price * item.qty;
+        total += subtotal;
+
+        let li = document.createElement("li");
+
+        li.innerHTML = `
+        ${p.name} ₱${p.price} x ${item.qty}
+        <button onclick="plus(${i})">+</button>
+        <button onclick="minus(${i})">-</button>
+        `;
+
+        cartList.appendChild(li);
+    });
+
+    document.getElementById("total").textContent = total;
+}
+
+function plus(i) {
+    cart[i].qty++;
+    renderCart();
+}
+
+function minus(i) {
+    if (cart[i].qty > 1) cart[i].qty--;
+    else cart.splice(i,1);
+
+    renderCart();
+}
+
+function clearCart() {
+    cart = [];
+    renderCart();
+}
+
+function checkout() {
+
+    if (cart.length === 0) return alert("Empty cart");
+
+    let products = JSON.parse(localStorage.getItem("products"));
+    let sales = JSON.parse(localStorage.getItem("sales")) || [];
+
+    let total = 0;
+    let receipt = "----- RECEIPT -----\n";
+
+    cart.forEach(item => {
+        let p = products[item.index];
+
+        if (p.stock >= item.qty) {
+            p.stock -= item.qty;
+        }
+
+        let sub = p.price * item.qty;
+        total += sub;
+
+        receipt += `${p.name} x${item.qty} = ₱${sub}\n`;
+    });
+
+    receipt += "-----------------\nTotal: ₱" + total;
+
+    alert(receipt);
+
+    sales.push({
+        name: "Order",
+        qty: cart.length,
+        total: total,
+        date: new Date()
+    });
+
+    localStorage.setItem("products", JSON.stringify(products));
+    localStorage.setItem("sales", JSON.stringify(sales));
+
+    cart = [];
+    renderCart();
+    loadCategory("All");
+}
+
+function applyDarkMode(){
+    const dark = localStorage.getItem("darkMode");
+
+    if(dark === "true"){
+        document.body.classList.add("dark-mode");
+    }
+}
+
+applyDarkMode();
+
+function logout() {
+    if (confirm("Logout?")) {
+        window.location.href = "index.html";
+    }
+}
+
+</script>
+
+</body>
+
+<footer class="main-footer">
+    <p>© 2026 Reyes POS System. All rights reserved.</p>
+    <small>Designed and Developed by Ashley Reyes</small>
+</footer>
+
+
+</html>

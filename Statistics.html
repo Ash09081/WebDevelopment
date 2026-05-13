@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <h2>Reyes POS</h2>
+    <nav>
+         <a href="Dashboard.html">Dashboard</a>
+            <a href="Pos.html">POS</a>
+            <a href="Inventory.html">Inventory</a>
+            <a href="Statistics.html">Statistics</a>
+            <a href="Settings.html">Settings</a>
+            <a href="#" onclick="logout()">Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+
+<header class="header">
+    <h1>Statistic</h1>
+</header>
+
+<div class="stats-container">
+
+<!-- LEFT -->
+<div class="stats-left">
+
+<!-- TOP SUMMARY -->
+<div class="stats-top">
+
+<div class="box">
+<h4>Today's Sales</h4>
+<p id="todaySales">₱0</p>
+</div>
+
+<div class="box">
+<h4>Today's Save</h4>
+<p id="todaySave">₱0</p>
+</div>
+
+<div class="box">
+<h4>This Month Total</h4>
+<p id="monthTotal">₱0</p>
+</div>
+
+<div class="box">
+<h4>Total Saved</h4>
+<p id="totalSaved">₱0</p>
+</div>
+
+</div>
+
+<!-- INPUT -->
+<div class="card">
+
+<label>Date</label>
+<input type="date" id="date">
+
+<label>Save %</label>
+<input type="number" id="savePercent" value="10">
+
+<button onclick="addRecord()">Add / Update</button>
+
+<button onclick="clearRecords()">Clear</button>
+
+</div>
+
+<!-- TABLE -->
+<div class="card">
+
+<h3>Daily Records</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Sales</th>
+<th>Save</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- RIGHT SUMMARY -->
+<div class="stats-right">
+
+<h3>Monthly Summary</h3>
+
+<p>Month: <span id="monthName"></span></p>
+
+<h4>Total Sales</h4>
+<p id="sumSales">₱0</p>
+
+<h4>Total Save</h4>
+<p id="sumSave">₱0</p>
+
+<h4>Best Month</h4>
+<p id="bestMonth">None</p>
+
+</div>
+
+</div>
+
+</main>
+</div>
+
+<script>
+
+function loadStats(){
+
+    let sales = JSON.parse(localStorage.getItem("sales")) || [];
+    let records = JSON.parse(localStorage.getItem("records")) || [];
+
+    let today = new Date().toISOString().split("T")[0];
+
+    let todayTotal = 0;
+    sales.forEach(s => {
+        let d = new Date(s.date).toISOString().split("T")[0];
+        if(d === today) todayTotal += s.total;
+    });
+
+    document.getElementById("todaySales").textContent = "₱" + todayTotal;
+
+    // ✅ load table
+    let table = document.getElementById("table");
+    table.innerHTML = "";
+
+    let totalSave = 0;
+    let monthTotal = 0;
+
+    let month = new Date().getMonth();
+
+    records.forEach(r => {
+
+        let row = `
+        <tr>
+        <td>${r.date}</td>
+        <td>₱${r.sales}</td>
+        <td>₱${r.save}</td>
+        </tr>
+        `;
+        table.innerHTML += row;
+
+        totalSave += r.save;
+
+        let m = new Date(r.date).getMonth();
+        if(m === month){
+            monthTotal += r.sales;
+        }
+    });
+
+    document.getElementById("todaySave").textContent = "₱" + totalSave;
+    document.getElementById("monthTotal").textContent = "₱" + monthTotal;
+    document.getElementById("totalSaved").textContent = "₱" + totalSave;
+
+    document.getElementById("sumSales").textContent = "₱" + monthTotal;
+    document.getElementById("sumSave").textContent = "₱" + totalSave;
+
+}
+
+function addRecord(){
+
+    let date = document.getElementById("date").value;
+    let percent = document.getElementById("savePercent").value;
+
+    let sales = JSON.parse(localStorage.getItem("sales")) || [];
+    let records = JSON.parse(localStorage.getItem("records")) || [];
+
+    let daySales = 0;
+
+    sales.forEach(s => {
+        let d = new Date(s.date).toISOString().split("T")[0];
+        if(d === date) daySales += s.total;
+    });
+
+    let save = daySales * (percent/100);
+
+    records.push({
+        date: date,
+        sales: daySales,
+        save: save
+    });
+
+    localStorage.setItem("records", JSON.stringify(records));
+
+    loadStats();
+}
+
+function clearRecords(){
+    if(confirm("Clear records?")){
+        localStorage.removeItem("records");
+        loadStats();
+    }
+}
+
+loadStats();
+
+function logout(){
+    if (confirm("Logout?")) {
+        window.location.href = "index.html";
+    }
+}
+
+function applyDarkMode(){
+    const dark = localStorage.getItem("darkMode");
+
+    if(dark === "true"){
+        document.body.classList.add("dark-mode");
+    }
+}
+
+applyDarkMode();
+</script>
+
+<footer class="main-footer">
+    <p>© 2026 Reyes POS System. All rights reserved.</p>
+    <small>Designed and Developed by Ashley Reyes</small>
+</footer>
+
+
+</body>
+</html>

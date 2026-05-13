@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reyes POS Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-page">
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>Reyes POS</h2>
+        <nav>
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="Pos.html">POS</a>
+            <a href="Inventory.html">Inventory</a>
+            <a href="Statistics.html">Statistics</a>
+            <a href="Settings.html">Settings</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- Header -->
+        <header class="header">
+            <h1>Reyes POS System</h1>
+            <span>Ashley Reyes | Administrator</span>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <section class="dashboard">
+
+    <!-- TOP CARDS -->
+    <div class="cards">
+        <div class="card">
+            <h3>Today Sales</h3>
+            <p id="todaySales">₱0</p>
+        </div>
+
+        <div class="card">
+            <h3>Items Sold</h3>
+            <p id="itemsSold">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Monthly Revenue</h3>
+            <p id="monthlyRevenue">₱0</p>
+        </div>
+
+        <div class="card">
+            <h3>Sales Statistic</h3>
+            <p id="totalSales">₱0</p>
+        </div>
+    </div>
+
+    <!-- BOTTOM SECTION -->
+    <div class="bottom">
+
+        <!-- Chart -->
+ <div class="card chart-card">
+
+    <div class="chart-header">
+        <h3>Sales Chart</h3>
+
+        <select id="filter" onchange="loadChart()">
+            <option value="monthly">Monthly</option>
+            <option value="daily">Today</option>
+            <option value="all">All Time</option>
+        </select>
+    </div>
+
+    <div id="chartBars" class="bars"></div>
+
+    <button class="reset-btn" onclick="clearSales()">Reset Sales</button>
+
+</div>
+
+
+        <!-- Recent Sales -->
+        <div class="card recent">
+            <h3>Recent Sales</h3>
+            <ul id="salesList">
+                <li>No sales yet</li>
+            </ul>
+        </div>
+
+    </div>
+
+</section>
+
+    </main>
+
+</div>
+</script>
+<script>
+
+function logout() {
+   const confirmLogout = confirm("Do you really want to logout from Reyes POS?");
+
+    if (confirmLogout) {
+        localStorage.removeItem("user");
+        window.location.href = "index.html";
+    }
+}
+
+function loadChart() {
+    const sales = JSON.parse(localStorage.getItem("sales")) || [];
+    const filter = document.getElementById("filter").value;
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    let data = new Array(12).fill(0);
+
+    const today = new Date();
+
+    sales.forEach(sale => {
+        let date = new Date(sale.date);
+
+        if (filter === "daily") {
+            if (
+                date.getDate() === today.getDate() &&
+                date.getMonth() === today.getMonth()
+            ) {
+                data[today.getMonth()] += sale.total;
+            }
+        }
+
+        else if (filter === "monthly") {
+            let month = date.getMonth();
+            data[month] += sale.total;
+        }
+
+        else if (filter === "all") {
+            let month = date.getMonth();
+            data[month] += sale.total;
+        }
+    });
+
+    const max = Math.max(...data, 1);
+    const container = document.getElementById("chartBars");
+    container.innerHTML = "";
+
+    data.forEach((value, i) => {
+        let height = (value / max) * 180;
+
+        let bar = document.createElement("div");
+        bar.style.height = height + "px";
+        
+        bar.innerHTML = `<span class="value">₱${value}</span>
+                 <span class="label">${months[i]}</span>`;
+
+
+        container.appendChild(bar);
+    });
+}
+
+
+
+
+/* LOAD SALES DATA */
+function loadDashboard() {
+    const sales = JSON.parse(localStorage.getItem("sales")) || [];
+
+    let total = 0;
+    let items = 0;
+
+    const list = document.getElementById("salesList");
+    list.innerHTML = "";
+
+    if (sales.length === 0) {
+        list.innerHTML = "<li>No sales yet</li>";
+    }
+
+    sales.forEach(sale => {
+        total += sale.total;
+        items += sale.qty;
+
+        const li = document.createElement("li");
+        li.textContent = sale.name + " - ₱" + sale.total;
+        list.appendChild(li);
+    });
+
+    document.getElementById("todaySales").textContent = "₱" + total;
+    document.getElementById("itemsSold").textContent = items;
+    document.getElementById("monthlyRevenue").textContent = "₱" + total;
+    document.getElementById("totalSales").textContent = "₱" + total;
+}
+
+function applyDarkMode(){
+    const dark = localStorage.getItem("darkMode");
+
+    if(dark === "true"){
+        document.body.classList.add("dark-mode");
+    }
+}
+
+applyDarkMode();
+
+
+function clearSales() {
+    if (!confirm("Are you sure you want to reset ALL sales?")) return;
+
+    localStorage.removeItem("sales");
+
+    loadDashboard();
+    loadChart();
+
+    alert("Sales data cleared!");
+}
+
+
+loadDashboard();
+loadChart();
+let date = new Date(sale.date);
+
+function filterByDate(sale) {
+    if (filter === "daily") {
+        return (
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth()
+        );
+    }
+
+    else if (filter === "monthly") {
+        return date.getMonth() === today.getMonth();
+    }
+
+    else if (filter === "all") {
+        return true;
+    }
+}
+
+</script>
+
+<footer class="main-footer">
+    <p>© 2026 Reyes POS System. All rights reserved.</p>
+    <small>Designed and Developed by Ashley Reyes</small>
+</footer>
+
+
+</body>
+</html>

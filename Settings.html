@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <h2>Reyes POS</h2>
+    <nav>
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="POS.html">POS</a>
+        <a href="Inventory.html">Inventory</a>
+        <a href="Statistics.html">Statistics</a>
+        <a href="Settings.html" class="active">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<header class="header">
+    <div>
+        <h1>Settings</h1>
+        <small>Manage your system preferences</small>
+    </div>
+
+    <div class="profile">
+        <img src="https://i.pravatar.cc/40" alt="">
+        <div>
+            <strong id="adminDisplay">Admin</strong>
+            <span>Administrator</span>
+        </div>
+    </div>
+</header>
+
+<div class="settings-premium">
+
+<!-- LEFT MENU -->
+<div class="settings-left">
+
+<button onclick="showTab('account', event)">Account</button>
+<button onclick="showTab('appearance', event)">Appearance</button>
+<button onclick="showTab('security', event)">Privacy & Security</button>
+<button onclick="showTab('support', event)">Help & Support</button>
+<button onclick="showTab('about', event)">About</button>
+
+
+</div>
+
+<!-- RIGHT CONTENT -->
+<div class="settings-right">
+
+<!-- SEARCH -->
+<input type="text" placeholder="Search for a setting..." class="search-box">
+
+<!-- ACCOUNT -->
+<div id="account" class="tab active">
+    <div class="card">
+        <h3>Personal Information</h3>
+
+        <label>Name</label>
+        <input id="adminName">
+
+        <label>Email</label>
+        <input id="email">
+
+        <label>Date of Birth</label>
+        <input id="birthday" type="date">
+
+        <button onclick="saveAccount()">Save Changes</button>
+    </div>
+</div>
+
+<!-- APPEARANCE -->
+<div id="appearance" class="tab">
+    <div class="card">
+        <h3>Appearance</h3>
+        <button onclick="toggleDark()">Toggle Dark Mode</button>
+    </div>
+</div>
+
+<!-- SECURITY -->
+<div id="security" class="tab">
+
+    <div class="card">
+
+        <h3>Privacy & Security</h3>
+
+        <!-- TWO FACTOR -->
+        <div class="setting-row">
+            <span>Two-Factor Authentication</span>
+
+            <label class="switch">
+                <input type="checkbox" id="twoFA" onchange="saveSecurity()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- LOGIN NOTIFICATIONS -->
+        <div class="setting-row">
+            <span>Login Notifications</span>
+
+            <label class="switch">
+                <input type="checkbox" id="loginNotify" onchange="saveSecurity()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+       
+<div id="passwordModal" class="modal">
+    <div class="modal-box">
+
+        <h3>Change Password</h3>
+
+        <label>New Password</label>
+        <div class="password-field">
+            <input type="password" id="newPass">
+            <span onclick="togglePass('newPass')">👁</span>
+        </div>
+
+        <label>Confirm Password</label>
+        <div class="password-field">
+            <input type="password" id="confirmPass">
+            <span onclick="togglePass('confirmPass')">👁</span>
+        </div>
+
+        <button onclick="savePassword()">Save</button>
+        <button onclick="closeModal()" class="cancel-btn">Cancel</button>
+
+    </div>
+</div>
+
+        <button onclick="openPasswordModal()">Change Password</button>
+
+    </div>
+
+</div>
+
+
+<!-- SUPPORT -->
+<div id="support" class="tab">
+    <div class="card">
+        <h3>Help & Support</h3>
+        <p>Email: support@reyespos.com</p>
+        <p>Phone: 0912-345-6789</p>
+    </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about" class="tab">
+    <div class="card">
+        <h3>About</h3>
+        <p>Reyes POS System v1.0</p>
+        <p>School Project System</p>
+    </div>
+</div>
+
+</div>
+
+</div>
+
+</main>
+</div>
+
+<script>
+
+/* TAB SYSTEM */
+
+function showTab(id, e) {
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".settings-left button").forEach(b=>b.classList.remove("active"));
+
+    document.getElementById(id).classList.add("active");
+    e.target.classList.add("active");
+}
+
+
+/* SAVE ACCOUNT */
+function saveAccount(){
+    localStorage.setItem("adminName", adminName.value);
+    localStorage.setItem("email", email.value);
+    localStorage.setItem("birthday", birthday.value);
+    alert("Saved!");
+}
+
+/* RESET */
+function resetSales(){
+    if(confirm("Clear sales?")){
+        localStorage.removeItem("sales");
+        alert("Done!");
+    }
+}
+
+function resetProducts(){
+    if(confirm("Clear products?")){
+        localStorage.removeItem("products");
+        alert("Done!");
+    }
+}
+
+function resetAll(){
+    if(confirm("Reset everything?")){
+        localStorage.clear();
+        alert("System reset!");
+    }
+}
+
+/* DARK MODE */
+
+function toggleDark(){
+    document.body.classList.toggle("dark-mode");
+
+    const isDark = document.body.classList.contains("dark-mode");
+
+    localStorage.setItem("darkMode", isDark);
+}
+
+/* SAVE SECURITY SETTINGS */
+function saveSecurity() {
+    const twoFA = document.getElementById("twoFA").checked;
+    const notify = document.getElementById("loginNotify").checked;
+
+    localStorage.setItem("twoFA", twoFA);
+    localStorage.setItem("notify", notify);
+}
+
+/* LOAD SETTINGS */
+function loadSecurity() {
+    document.getElementById("twoFA").checked =
+        localStorage.getItem("twoFA") === "true";
+
+    document.getElementById("loginNotify").checked =
+        localStorage.getItem("notify") === "true";
+}
+
+function closeModal(){
+    document.getElementById("passwordModal").style.display = "none";
+}
+
+/* SHOW / HIDE PASSWORD */
+function togglePass(id){
+    let input = document.getElementById(id);
+
+    if(input.type === "password"){
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
+
+/* SAVE PASSWORD */
+function savePassword(){
+
+    let newPass = document.getElementById("newPass").value;
+    let confirmPass = document.getElementById("confirmPass").value;
+
+    if(newPass === "" || confirmPass === ""){
+        return alert("Fill all fields!");
+    }
+
+    if(newPass !== confirmPass){
+        return alert("Passwords do not match!");
+    }
+
+    /* ✅ SAVE TO LOCAL STORAGE USER */
+    let user = JSON.parse(localStorage.getItem("user")) || {};
+
+    user.password = newPass;
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    alert("Password updated!");
+
+    closeModal();
+}
+
+/* CHANGE PASSWORD */
+
+function openPasswordModal(){
+    document.getElementById("passwordModal").style.display = "flex";
+}
+
+loadSecurity();
+
+function logout(){
+    if (confirm("Logout?")) {
+        window.location.href = "index.html";
+    }
+}
+/* LOAD ACCOUNT */
+function loadUser(){
+    const name = localStorage.getItem("adminName") || "Admin";
+    adminName.value = name;
+    document.getElementById("adminDisplay").textContent = name;
+}
+
+loadUser();
+
+function applyDarkMode(){
+    const dark = localStorage.getItem("darkMode");
+
+    if(dark === "true"){
+        document.body.classList.add("dark-mode");
+    }
+}
+
+applyDarkMode();
+
+
+
+</script>
+
+<footer class="main-footer">
+    <p>© 2026 Reyes POS System. All rights reserved.</p>
+    <small>Designed and Developed by Ashley Reyes</small>
+</footer>
+
+</body>
+</html>

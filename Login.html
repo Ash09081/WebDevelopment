@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reyes POS - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-page">
+
+  <div class="login-container">
+    <h1>Login</h1>  
+
+    <form onsubmit="loginUser(event)">
+      <label>Email</label>
+      <input type="email" id="email" required>
+
+      <label>Password</label>
+      
+<div class="password-field">
+    <input type="password" id="password" required>
+    <span onclick="togglePass('password')">👁</span>
+</div>
+
+<p class="forgot">
+    <a href="#" onclick="openForgotModal(); return false;">Forgot Password?</a>
+</p>
+
+
+      <div class="remember">
+        <input type="checkbox">
+        <label>Remember Me</label>
+      </div>
+
+      <button class="btn">Login</button>
+    </form>
+
+    <p class="register-link">
+      Don't have an account?
+      <a href="Register.html">Register</a>
+    </p>
+  </div>
+  <!-- FORGOT PASSWORD MODAL -->
+<div id="forgotModal" class="modal">
+
+    <div class="modal-box">
+
+        <h3>Reset Password</h3>
+
+        <label>Email</label>
+        <input type="email" id="resetEmail">
+
+        <label>New Password</label>
+        <div class="password-field">
+            <input type="password" id="newPassword">
+            <span onclick="togglePass('newPassword')">👁</span>
+        </div>
+
+        <label>Confirm Password</label>
+        <div class="password-field">
+            <input type="password" id="confirmNewPassword">
+            <span onclick="togglePass('confirmNewPassword')">👁</span>
+        </div>
+
+        <button onclick="resetPassword()">Reset</button>
+        <button onclick="closeForgot()" class="cancel-btn">Cancel</button>
+
+    </div><div id="forgotModal" class="modal">
+
+    <div class="modal-box">
+
+        <h2>Reset Password</h2>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="resetEmail">
+        </div>
+
+        <div class="form-group">
+            <label>New Password</label>
+            <div class="password-field">
+                <input type="password" id="newPassword">
+                <span onclick="togglePass('newPassword')">👁</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="password-field">
+                <input type="password" id="confirmNewPassword">
+                <span onclick="togglePass('confirmNewPassword')">👁</span>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn primary" onclick="resetPassword()">Reset</button>
+            <button class="btn danger" onclick="closeForgot()">Cancel</button>
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+function loginUser(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (!savedUser) {
+        alert("No account found. Please register first.");
+        return;
+    }
+
+    if (email === savedUser.email && password === savedUser.password) {
+        alert("Login successful!");
+        window.location.href = "Dashboard.html";
+    } else {
+        alert("Invalid email or password!");
+    }
+}
+
+function openForgotModal(){
+    document.getElementById("forgotModal").style.display = "flex";
+}
+
+function closeForgot(){
+    document.getElementById("forgotModal").style.display = "none";
+}
+function resetPassword(){
+
+    const email = document.getElementById("resetEmail").value;
+    const newPass = document.getElementById("newPassword").value;
+    const confirm = document.getElementById("confirmNewPassword").value;
+
+    let user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+        return alert("No account found!");
+    }
+
+    if (email !== user.email) {
+        return alert("Email not found!");
+    }
+
+    if (!newPass || !confirm) {
+        return alert("Fill all fields!");
+    }
+
+    if (newPass !== confirm) {
+        return alert("Passwords do not match!");
+    }
+
+    user.password = newPass;
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    alert("Password successfully updated!");
+
+    closeForgot();
+}
+
+function togglePass(id){
+    let input = document.getElementById(id);
+
+    if(input.type === "password"){
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
+
+
+</script>
+
+</body>
+</html>
